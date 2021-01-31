@@ -10,6 +10,23 @@ type person struct {
 	hobby  []string
 }
 
+type person1 struct {
+	name, gender string
+}
+
+// go语言中函数参数永远是拷贝
+func f(x *person1) {
+	(*x).gender = "女" // 根据内存地址修改
+	x.gender = "男"    // 语法糖形式
+}
+
+// struct结构体中定义的数据内存地址是连续的
+type test struct {
+	a int8
+	b int8
+	c int8
+}
+
 func main() {
 	var syz person
 
@@ -30,5 +47,34 @@ func main() {
 	s.x = "嘿嘿嘿"
 	s.y = 100
 	fmt.Printf("type:%T value:%v", s, s)
+
+	var zjw person1
+
+	f(&zjw)
+	fmt.Println(zjw)
+
+	var p1 = new(person)
+	fmt.Println(p1)
+	p1.gender = "男"
+	(*p1).gender = "女"
+	fmt.Println(p1)
+	fmt.Printf("%p\n", p1)  // p1保存的内存地址
+	fmt.Printf("%p\n", &p1) //  p1的内存地址
+
+	// 初始化并复制
+	var p3 = person{
+		name:   "222",
+		gender: "男",
+	}
+	fmt.Printf("%v", p3)
+
+	var p4 = test{
+		a: 100,
+		b: 100,
+		c: 100,
+	}
+	fmt.Printf("%p\n", &p4.a)
+	fmt.Printf("%p\n", &p4.b)
+	fmt.Printf("%p\n", &p4.c)
 
 }
