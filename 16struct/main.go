@@ -27,6 +27,27 @@ type test struct {
 	c int8
 }
 
+// 构造函数，当结构体比较大，尽量构造指针，减少程序的运行开销
+func newStu(name string, age int) student {
+	return student{
+		name: name,
+		age:  age,
+	}
+}
+
+// 返回结构体指针地址
+func newStu1(name string, age int) *student {
+	return &student{
+		name: name,
+		age:  age,
+	}
+}
+
+type student struct {
+	name string
+	age  int
+}
+
 func main() {
 	var syz person
 
@@ -53,6 +74,8 @@ func main() {
 	f(&zjw)
 	fmt.Println(zjw)
 
+	// -----------------------------
+
 	var p1 = new(person)
 	fmt.Println(p1)
 	p1.gender = "男"
@@ -60,6 +83,8 @@ func main() {
 	fmt.Println(p1)
 	fmt.Printf("%p\n", p1)  // p1保存的内存地址
 	fmt.Printf("%p\n", &p1) //  p1的内存地址
+
+	// -----------------------------
 
 	// 初始化并复制
 	var p3 = person{
@@ -76,5 +101,11 @@ func main() {
 	fmt.Printf("%p\n", &p4.a)
 	fmt.Printf("%p\n", &p4.b)
 	fmt.Printf("%p\n", &p4.c)
+
+	// -----------------------------
+
+	s1 := newStu("syz", 21)  // 构造结构体
+	s2 := newStu1("zjw", 20) // 构造结构体，返回指针
+	fmt.Println(s1, s2)
 
 }
