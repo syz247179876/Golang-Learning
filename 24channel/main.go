@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
 var wg sync.WaitGroup
@@ -29,7 +30,7 @@ func createChan() {
 }
 
 func rangeFor() {
-	// 开启一个goroutine定义一个匿名函数，发送值到ch1
+	// 开启一个goroutine定义一个无缓冲区的通道，发送值到ch1
 	ch1 := make(chan int)
 	ch2 := make(chan int)
 	go func() {
@@ -85,6 +86,15 @@ func read(out <-chan int) {
 	}
 }
 
+func worker(id int, jobs <-chan int, results chan<- int) {
+	for j := range jobs { // 如果jobs未空，则接收阻塞，释放处理机
+		fmt.Printf("worker:%d start job:%d\n", id, j)
+		time.Sleep(time.Second)
+		fmt.Printf("worker:%d end job:%d\n", id, j)
+		results <- j * 2
+	}
+}
+
 func main() {
 	ch := make(chan int)     // 定义一个无缓冲通道,即同步通道
 	ch2 := make(chan int, 1) // 创建一个容量为1的有缓冲区通道
@@ -103,4 +113,42 @@ func main() {
 	go writer(inner)    // 向通道中写数据
 	go wr(outer, inner) // 遍历inner，写入outer
 	read(outer)         // 遍历outer
+
+	/* ----------------goroutine池,循环执行---------------------- */
+
+	jobs := make(chan int, 100)
+	results := make(chan int, 100)
+
+	// 开启三个goroutine
+	for i := 0; i < 3; i++ {
+		go worker(i, jobs, results)
+	}
+
+	// 创建5个job，模拟操作，写入jobs通道中
+	for i := 0; i < 5; i++ {
+		jobs <- i
+	}
+
+	close(jobs)
+
+	// 输出结果
+	for i := 0; i < 5; i++ {
+		<-results
+	}
+
+	/* ----------------select关键字的多路复用技术---------------------- */
+	selectChannel := make(chan int, 1)
+	for i := 0; i < 10; i++ {
+		// 每轮只能选取多个case中通信操作处理完毕的其中一个
+		// 可处理一个或多个channel的发送/接收操作。
+		// 如果多个case同时满足，select会随机选择一个。
+		// 对于没有case的select{}会一直等待，可用于阻塞main函数。
+		select {
+		case x := <-selectChannel:
+			fmt.Println("读出数据", x)
+		case selectChannel <- i:
+			fmt.Println("写入数据")
+		}
+	}
+
 }
