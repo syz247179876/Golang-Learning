@@ -143,6 +143,7 @@ func main() {
 		// 可处理一个或多个channel的发送/接收操作。
 		// 如果多个case同时满足，select会随机选择一个。
 		// 对于没有case的select{}会一直等待，可用于阻塞main函数。
+		// select相比于for轮寻性能提高
 		select {
 		case x := <-selectChannel:
 			fmt.Println("读出数据", x)
