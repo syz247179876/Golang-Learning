@@ -12,7 +12,7 @@ const (
 )
 const (
 	name = "syz"
-	age = 19
+	age  = 19
 )
 
 // 如果某一行申明后没有赋值，默认和上一行一致
@@ -61,12 +61,11 @@ const (
 	TB = 1 << (10 * iota)
 )
 
-func define_fun(){
+func define_fun() {
 	n := 23
 	m := 200
 	fmt.Println(n, m)
 }
-
 
 func main() {
 	define_fun()
